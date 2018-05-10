@@ -8,21 +8,14 @@ package it.unipd.dei.bdc1718;
 * */
 
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import scala.Tuple2;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.io.IOException;
 
 public class G08HM4 {
 
@@ -66,44 +59,46 @@ public class G08HM4 {
 
   //runMapReduce method
   private static ArrayList<Vector> runMapReduce(JavaRDD<Vector> pointsrdd, int k, int numBlocks){
-    /*JavaPairRDD<Long, Vector> y = pointsrdd.mapToPair((z) -> {
-      return new Tuple2<>((long) (Math.random() * pointsrdd.count()/numBlocks), z);
-    });*/
+    //Variables for take the time
+    long start, end;
 
+    start = System.currentTimeMillis();
+    //We are going to produce the coreset for the sequential algorithm.
+    ArrayList<Vector> coreset = pointsrdd
+            //produce a key-value pair for each elements in pointsRDD with the key between 0 and numBlocks
+            .mapToPair((z) -> new Tuple2<>((long) (Math.random() * numBlocks), z))
+            .groupByKey()
+            .mapValues((its) ->{
+              //Transform each pairs with the same key in ArrayList of Vector and produce a pair with the same key as
+              //before and the ArrayList as value
+              ArrayList<Vector> list = new ArrayList<>(0);
+              for (Vector it : its) {
+                list.add(it);
+              }
+              return  list;
+            }).mapToPair((z) -> {
+              //Now we can run the k-centers algorithm for each pairs and create a new pair with key equal to 0 and
+              //as value the centers returned by the algorithm
+              ArrayList<Vector> centers = kcenter(z._2(), k);
+              return new Tuple2<>(0L, centers);
+            })
+            .groupByKey().mapValues((its) -> {
+              //Now we gather all the pair and produce only one ArrayList with all the points
+              ArrayList<Vector> list = new ArrayList<>(0);
+              for (ArrayList<Vector> it : its) list.addAll(it);
+              return list;
+            })
+            //Now transform the RDD and take the only one element remain
+            .map((list) -> (list._2())).take(1).get(0);
+    end = System.currentTimeMillis();
+    System.out.println("The time for computing the coreset is " + (end - start) + " ms");
 
-    ArrayList<Vector> coreset = pointsrdd.mapToPair((z) -> {
-      return new Tuple2<>((long) (Math.random() * numBlocks), z);
-    }).groupByKey().mapValues((its) ->{
-      ArrayList<Vector> list = new ArrayList<>(0);
-      for (Vector it : its) {
-        list.add(it);
-      }
-      return  list;
-    }).mapToPair((z) -> {
-      ArrayList<Vector> centers = kcenter(z._2(), k);
-      return new Tuple2<>(0L, centers);
-    }).groupByKey().mapValues((its) -> {
-      ArrayList<Vector> list = new ArrayList<>(0);
-      for (ArrayList<Vector> it : its) {
-        for (Vector v : it) {
-          list.add(v);
-        }
-      }
-      return list;
-    }).map((list) -> (list._2())).take(1).get(0);
-/*
-    ArrayList<Vector> y = pointsrdd.foreachPartition((its) -> {
-      ArrayList<Vector> list = new ArrayList<>();
-      for (Vector it : its) {
-        list.add(it);
-      }
-      return list;
-    }).map((list) -> {
-      ArrayList<Vector> centers = kcenter(list, k);
-      return centers;
-    })*/
-
-    return coreset;
+    //Now we can return the result of the sequential algorithm produces in the corset
+    start = System.currentTimeMillis();
+    ArrayList<Vector> result = runSequential(coreset, k);
+    end = System.currentTimeMillis();
+    System.out.println("The time for the sequential algotihm is " + (end - start) + " ms");
+    return result;
   }
 
   //Function for converting string to vector (The same as the Homework 3)
@@ -160,7 +155,7 @@ public class G08HM4 {
   }
 
   //Sequential approximation algorithm based on matching.
-  public static ArrayList<Vector> runSequential(final ArrayList<Vector> points, int k) {
+  private static ArrayList<Vector> runSequential(final ArrayList<Vector> points, int k) {
     final int n = points.size();
     if (k >= n) {
       return points;
