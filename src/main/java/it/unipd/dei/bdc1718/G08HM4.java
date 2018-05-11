@@ -27,7 +27,7 @@ public class G08HM4 {
     int k, numBlocks;
     long start, end;
 
-    //Take the value k and numBlocks form the command line
+    //Take the value k and numBlocks from the command line
     try {
       k = Integer.valueOf(args[1]);
       numBlocks = Integer.valueOf(args[2]);
@@ -45,8 +45,6 @@ public class G08HM4 {
 
     //Creation of the JavaRDD from the text file passed in input
     JavaRDD<Vector> points = sc.textFile(args[0]).map(G08HM4::strToVector).repartition(numBlocks).cache();
-
-    points.count();
 
     ArrayList<Vector> x = runMapReduce(points, k, numBlocks);
     System.out.println(x.size());
@@ -97,7 +95,7 @@ public class G08HM4 {
     start = System.currentTimeMillis();
     ArrayList<Vector> result = runSequential(coreset, k);
     end = System.currentTimeMillis();
-    System.out.println("The time for the sequential algotihm is " + (end - start) + " ms");
+    System.out.println("The time for the sequential algorithm is " + (end - start) + " ms");
     return result;
   }
 
