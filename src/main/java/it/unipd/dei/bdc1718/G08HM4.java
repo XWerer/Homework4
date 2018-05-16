@@ -52,6 +52,9 @@ public class G08HM4 {
       System.out.println(v);
     }
 
+    double avgdist = measure(x);
+    System.out.println("la distamnza media è "+ avgdist);
+
     System.in.read();
   }
 
@@ -201,6 +204,22 @@ public class G08HM4 {
       throw new IllegalStateException("Result of the wrong size");
     }
     return result;
+  }
+
+  private static double measure( ArrayList<Vector> pointslist){
+    double average =0;
+    double distanza = 0;
+    int pairs =0;
+    for(int i=0;i < pointslist.size(); i++){
+      for(int j=0; j < pointslist.size(); j++){
+          if(i !=j) {
+              distanza += Vectors.sqdist(pointslist.get(i), pointslist.get(j));
+              pairs++;
+          }
+      }
+    }
+    average  = distanza / pairs;
+    return average;
   }
 
 }
