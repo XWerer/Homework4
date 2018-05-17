@@ -54,11 +54,11 @@ public class G08HM4 {
 
     //Now we are going to use the runMapReduce method to compute the Diversity Maximization with MapReduce
     ArrayList<Vector> pointslist = runMapReduce(points, k, numBlocks);
-    ///* For debugging
+    /* For debugging
     System.out.println(pointslist.size());
     for (Vector v : pointslist) {
       System.out.println(v);
-    }//*/
+    }*/
 
     //Now compute and print the average distance between all points with the measure method 
     System.out.println("The average distance is " + measure(pointslist));
