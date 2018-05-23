@@ -75,7 +75,7 @@ public class G08HM4 {
     //We are going to produce the coreset for the sequential algorithm.
     ArrayList<Vector> coreset = pointsrdd
             //produce a key-value pair for each elements in pointsRDD with the key between 0 and numBlocks
-            .mapToPair((z) -> new Tuple2<>((long) (Math.random() * numBlocks), z))
+            .mapToPair((z) -> new Tuple2<>((long) (Math.random() * (numBlocks - 1)), z))
             .groupByKey()
             .mapValues((its) ->{
               //Transform each pairs with the same key in ArrayList of Vector and produce a pair with the same key as
