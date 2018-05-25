@@ -118,7 +118,7 @@ public class G08HM4 {
     return Vectors.dense(data);
   }
 
-  //Method Farthest-First-Traversal for k-center with time complexity O( |P| * k )
+  //Method Farthest-First-Traversal for k-center with time complexity O( |P| * k ) (The same as the Homework 3)
   private static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
     ArrayList<Vector> centers = new ArrayList<>();
     //storing the centers
