@@ -83,10 +83,10 @@ public class G08HM4 {
               ArrayList<Vector> list = new ArrayList<>(0);
               for (Vector it : its) list.add(it);
               return  list;
-            }).mapToPair((z) -> {
+            }).mapToPair((pair) -> {
               //Now we can run the k-centers algorithm for each pairs and create a new pair with key equal to 0 and
               //as value the centers returned by the algorithm
-              ArrayList<Vector> centers = kcenter(z._2(), k);
+              ArrayList<Vector> centers = kcenter(pair._2(), k);
               return new Tuple2<>(0L, centers);
             })
             .groupByKey().mapValues((its) -> {
