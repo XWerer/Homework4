@@ -135,7 +135,7 @@ public class G08HM4 {
     for (int i = 0; i < k - 1; i++) {               //k-1 because the first center is yet determined
       for (int j = 0; j < P.size(); j++) {
         if (i==0) {                             //first round i have to compute the distance to the center for every point
-          dist.add(Vectors.sqdist(centers.get(i), P.get(j)));
+          dist.add(Math.sqrt(Vectors.sqdist(centers.get(i), P.get(j))));
           if (dist.get(j) > distance) { //find the farther point
             max = P.get(j);
             distance = dist.get(j);
