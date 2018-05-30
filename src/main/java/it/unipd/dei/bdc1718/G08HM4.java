@@ -74,17 +74,17 @@ public class G08HM4 {
     start = System.currentTimeMillis();
     //We are going to produce the coreset for the sequential algorithm.
     ArrayList<Vector> coreset = pointsrdd
-            //produce a key-value pair for each elements in pointsRDD with the key between 0 and numBlocks
+            //produce a key-value pair for each elements in pointsRDD with the key between 0 and numBlocks-1
             .mapToPair((z) -> new Tuple2<>((long) (Math.random() * (numBlocks - 1)), z))
             .groupByKey()
             .mapValues((its) ->{
-              //Transform each pairs with the same key in ArrayList of Vector and produce a pair with the same key as
+              //Transform each pair with the same key in ArrayList of Vector and produce a pair with the same key as
               //before and the ArrayList as value
               ArrayList<Vector> list = new ArrayList<>(0);
               for (Vector it : its) list.add(it);
               return  list;
             }).mapToPair((pair) -> {
-              //Now we can run the k-centers algorithm for each pairs and create a new pair with key equal to 0 and
+              //Now we can run the k-centers algorithm for each pair and create a new pair with key equal to 0 and
               //as value the centers returned by the algorithm
               ArrayList<Vector> centers = kcenter(pair._2(), k);
               return new Tuple2<>(0L, centers);
@@ -95,12 +95,12 @@ public class G08HM4 {
               for (ArrayList<Vector> it : its) list.addAll(it);
               return list;
             })
-            //Now transform the RDD and take the only one element remain
+            //Now transform the RDD and take the only one element remaining
             .map((list) -> (list._2())).take(1).get(0);
     end = System.currentTimeMillis();
     System.out.println("The time for computing the coreset is " + (end - start) + " ms");
 
-    //Now we can return the result of the sequential algorithm produces in the corset
+    //Now we can return the result of the sequential algorithm produced in the corset
     start = System.currentTimeMillis();
     ArrayList<Vector> result = runSequential(coreset, k);
     end = System.currentTimeMillis();
@@ -118,7 +118,8 @@ public class G08HM4 {
     return Vectors.dense(data);
   }
 
-  //Method Farthest-First-Traversal for k-center with time complexity O( |P| * k ) (The same as the Homework 3)
+  //Method Farthest-First-Traversal for k-center with time complexity O( |P| * k ) (The same as the Homework 3,
+  // with the square root of the distances).
   private static ArrayList<Vector> kcenter(ArrayList<Vector> P, int k) {
     ArrayList<Vector> centers = new ArrayList<>();
     //storing the centers
@@ -219,7 +220,7 @@ public class G08HM4 {
     for(int i = 0; i < pointslist.size(); i++){
       for(int j = 0; j < pointslist.size(); j++){
           if(i != j) {
-              distance += Vectors.sqdist(pointslist.get(i), pointslist.get(j));
+              distance += Math.sqrt(Vectors.sqdist(pointslist.get(i), pointslist.get(j)));
               nPairs++;
           }
       }
